@@ -1,0 +1,1985 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Study Adda</title>
+  <style>
+    :root {
+      --bg-color: #f4f7f9;
+      --text-color: #222;
+      --sidebar-bg: #fff;
+      --sidebar-text: #333;
+      --accent-color: #3a86ff;
+      --btn-bg: #3a86ff;
+      --btn-text: #fff;
+      --input-bg: #fff;
+      --input-text: #222;
+      --hover-bg: #e6f0ff;
+      --border-color: #ddd;
+      --btn-box-shadow: rgba(58, 134, 255, 0.4);
+    }
+    [data-theme="dark"] {
+      --bg-color: #121213;
+      --text-color: #eeeeee;
+      --sidebar-bg: #1e1e1e;
+      --sidebar-text: #ddd;
+      --accent-color: #8ab4f8;
+      --btn-bg: #8ab4f8;
+      --btn-text: #121213;
+      --input-bg: #2a2a2a;
+      --input-text: #eee;
+      --hover-bg: #333944;
+      --border-color: #444;
+      --btn-box-shadow: rgba(138, 180, 248, 0.6);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: var(--bg-color);
+      color: var(--text-color);
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+    }
+    .container {
+      flex-grow: 1;
+      display: flex;
+      overflow: hidden;
+      min-height: 0;
+    }
+    .sidebar {
+      background-color: var(--sidebar-bg);
+      color: var(--sidebar-text);
+      width: 250px;
+      display: flex;
+      flex-direction: column;
+      padding: 1rem;
+      border-right: 1px solid var(--border-color);
+    }
+    .sidebar header {
+      font-size: 1.5rem;
+      font-weight: 700;
+      margin-bottom: 1rem;
+      color: var(--accent-color);
+      text-align:center;
+      user-select: none;
+    }
+    .search-bar {
+      margin-bottom: 1rem;
+    }
+    .search-bar input {
+      width: 100%;
+      padding: 0.4rem 0.8rem;
+      border-radius: 4px;
+      border: 1px solid var(--border-color);
+      background-color: var(--input-bg);
+      color: var(--input-text);
+      font-size: 1rem;
+      transition: border-color 0.3s ease;
+    }
+    .search-bar input:focus {
+      outline: none;
+      border-color: var(--accent-color);
+      box-shadow: 0 0 5px var(--accent-color);
+    }
+    .subject-list {
+      flex-grow: 1;
+      overflow-y: auto;
+      min-height: 0;
+    }
+    .subject-item {
+      background-color: transparent;
+      border: none;
+      width: 100%;
+      text-align: left;
+      padding: 0.6rem 0.8rem;
+      font-size: 1.1rem;
+      color: var(--sidebar-text);
+      cursor: pointer;
+      border-radius: 4px;
+      transition: color 0.3s ease;
+      user-select: none;
+    }
+    .subject-item.active {
+      color: var(--accent-color);
+      font-weight: 600;
+    }
+    .mode-toggle {
+      margin-top: 1rem;
+      padding: 0.5rem;
+      background-color: var(--btn-bg);
+      color: var(--btn-text);
+      border: none;
+      border-radius: 6px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background-color 0.3s ease, box-shadow 0.2s ease, transform 0.15s ease;
+      user-select: none;
+    }
+    .mode-toggle:hover {
+      background-color: #1e6cd1;
+      box-shadow: 0 0 10px var(--accent-color);
+      transform: scale(1.05);
+    }
+    .mode-toggle:focus-visible {
+      outline: none;
+      box-shadow: 0 0 12px var(--accent-color);
+    }
+    main {
+      flex-grow: 1;
+      padding: 1.5rem 2rem;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start;
+      min-height: 0;
+    }
+    main h1 {
+      font-size: 2rem;
+      margin-bottom: 0.5rem;
+      color: var(--accent-color);
+      user-select: none;
+    }
+    .description {
+      margin-bottom: 1rem;
+      font-size: 1.15rem;
+      line-height: 1.5;
+      user-select: none;
+    }
+    .option-buttons, .unit-list {
+      display: flex;
+      flex-direction: column; /* vertical stack */
+      gap: 0.75rem;
+      margin-bottom: 1rem;
+      max-width: 400px; /* comfortable width */
+    }
+    .option-buttons button, .unit-list button, #returnHomeBtn {
+      padding: 0.5rem 1rem;
+      border-radius: 6px;
+      border: 2px solid var(--accent-color);
+      background: none;
+      color: var(--accent-color);
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background-color 0.3s ease, color 0.3s ease, box-shadow 0.2s ease, transform 0.15s ease;
+      user-select: none;
+      text-align: left;
+    }
+    .option-buttons button.selected, .option-buttons button:hover,
+    .unit-list button.selected, .unit-list button:hover,
+    #returnHomeBtn:hover {
+      background-color: var(--accent-color);
+      color: var(--btn-text);
+      box-shadow: 0 0 10px var(--accent-color);
+      transform: scale(1.05);
+    }
+    #returnHomeBtn {
+      margin-top: auto;
+      border-width: 3px;
+      font-weight: 700;
+      align-self: flex-start;
+    }
+    .content-area {
+      font-size: 1rem;
+      line-height: 1.6;
+      background-color: var(--sidebar-bg);
+      border-radius: 8px;
+      padding: 1rem 1.5rem;
+      box-shadow: rgba(0,0,0,0.05) 0px 4px 8px;
+      max-width: 700px;
+      user-select: text;
+      white-space: pre-line;
+      margin-bottom: 1rem;
+    }
+    ::-webkit-scrollbar {
+      width: 8px;
+    }
+    ::-webkit-scrollbar-thumb {
+      background-color: var(--accent-color);
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    footer {
+      background-color: var(--sidebar-bg);
+      text-align: center;
+      padding: 0.75rem;
+      border-top: 1px solid var(--border-color);
+      color: var(--sidebar-text);
+      font-size: 0.9rem;
+      flex-shrink: 0;
+      user-select: none;
+    }
+
+    #scrollTopBtn {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background-color: var(--btn-bg);
+      border: none;
+      border-radius: 50%;
+      width: 38px;
+      height: 38px;
+      cursor: pointer;
+      display: none; /* initially hidden */
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+      transition: background-color 0.3s ease, transform 0.15s ease;
+      z-index: 1000;
+      user-select: none;
+    }
+    #scrollTopBtn svg {
+      fill: var(--btn-text);
+      width: 20px;
+      height: 20px;
+    }
+    #scrollTopBtn:hover {
+      background-color: #1e6cd1;
+      transform: scale(1.1);
+    }
+  </style>
+</head>
+<body data-theme="light">
+  <div class="container">
+    <nav class="sidebar" aria-label="Subject menu and controls">
+      <header>Study Subjects</header>
+      <div class="search-bar">
+        <input type="text" id="searchInput" placeholder="Search subjects..." aria-label="Search subjects" spellcheck="false" autocomplete="off" />
+      </div>
+      <div class="subject-list" id="subjectList" role="list" aria-live="polite">
+        <!-- Subjects will be inserted here -->
+      </div>
+      <button class="mode-toggle" id="modeToggle" aria-pressed="false" aria-label="Toggle dark/light mode" tabindex="0">Dark Mode</button>
+    </nav>
+
+    <main id="mainContent" tabindex="-1" aria-live="polite" aria-atomic="true">
+      <h1>Welcome to Study Adda .</h1>
+      <h2>Here you can search and Subject as your Syllabus</h2>
+      <p class="description">Select a subject from the left menu to see its units, overview, and full explanation.</p>
+    </main>
+  </div>
+
+  <footer>
+    &copy; 2025 Study Adda - All rights reserved.
+  </footer>
+
+  <button id="scrollTopBtn" aria-label="Scroll to top" title="Scroll to top" type="button">
+    <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+      <path d="M12 4l-8 8h5v8h6v-8h5z"/>
+    </svg>
+  </button>
+
+  <script>
+    const subjects = [
+      {
+        id: 'daa',
+        name: 'Design and Analysis of Algorithms',
+        units: [
+          {
+            id: 'daa1',
+            name: 'Introduction and Analysis',
+            overview: 'Introduction to algorithms and analysis: Learn what algorithms are, their importance, and complexity measurement techniques including Big O notation. Analysis of Algorithms is a fundamental aspect of computer science that involves evaluating performance of algorithms and programs. Efficiency is measured in terms of time and space..Basics on Analysis of Algorithms:...Why is Analysis Important?...Order of Growth...Asymptotic Analysis ..Worst, Average and Best Cases of Algorithms.',
+            explanation: `Algorithms are step-by-step procedures for solving problems efficiently. This unit covers fundamental concepts such as algorithmic thinking, correctness, and asymptotic analysis. We discuss time and space complexity, worst-case and average-case scenarios, and formal definitions of Big O, Big Omega, and Big Theta notations, with examples to illustrate each concept.An algorithm is a step-by-step set of instructions, which are meaningful and used to solve any particular problem. To perform every process, there is a set of Algorithms, which lets us know how to proceed with the problem and solve it in some steps.
+
+The analysis of an algorithm is a technique that measures the performance of an algorithm. 
+The factors over which the algorithms majorly depend are the space and time complexities. There are other factors as well, which we use for the analysis of algorithms, we will learn about them ahead in the article.
+
+Takeaways------**
+
+Analysis of algorithms is the process of finding the computational complexity of any algorithm.
+
+
+
+Introduction to Algorithms
+
+Algorithms are step-by-step instructions that help us in doing some tasks. For example, if you want to cook maggie(let’s suppose), then you will be following the below algorithm :
+
+Boil some water in a Pan
+Add maggie into it
+Add maggie masala
+Check for toppings
+If present :
+Sprinkle them
+Else :
+Do not sprinkle
+Serve the maggie
+
+Similarly, in the computer science terminologies, an algorithm is defined as the set of well-defined instructions, that helps us to solve any particular problem.There are certain parameters that we should note while writing any algorithm.
+
+The parameters for good algorithms are stated below :
+
+The input and output of the algorithm must be accurate.
+The steps in the algorithm should be clear and with no ambiguity
+It should be effective, to solve a problem.
+The algorithm should not be written in any programming language. That means, it should be possible for the users to code the algorithm into any of the programming languages of their choice.
+What is the Analysis of the Algorithm ?
+Analysis of algorithms is the process of finding the computational complexity of any algorithm. By computational complexity, we are referring to the amount of time taken, space, and any other resources needed to execute(run) the algorithm.
+
+The goal of algorithm analysis is to compare different algorithms that are used to solve the same problem. This is done to evaluate which method solves a certain problem more quickly, efficiently, and memory-wise.
+
+analysis-of-the-algorithm
+Usually, the time complexity is determined by the size of the algorithm’s input to the number of steps taken to execute it. Also, the space complexity is mostly determined by the amount of storage needed by the algorithm to execute.
+
+If an algorithm runs in a reasonable amount of time or space on any machine, where that time and space are measured as a function of the size of the input (usually), then the algorithm is considered to be efficient. In simple terms, if the resource consumption or the computation cost of an algorithm grows slowly with the growth of the size of the input, then the algorithm might be considered as efficient. Do not worry if these terms confuse you, we will be learning about these in great depth ahead in the article.
+
+What is the Need for Analysis of the Algorithm ?
+Let’s say you created a website where users may read and post blogs. In the early stages of development, the website’s user base is quite small (say 10−2010−20 users). But with time, the number of users on your website grows dramatically, reaching 40k – 50k users. Now, the questions that will start popping into your mind are :
+
+Will my website scale well with these many users ?
+Or, it would start lagging and take a great time to respond to any user ?
+So, these issues would not arise if you had addressed them when designing your website. But, if you neglected these factors in the beginning, then there are higher chances that your code will crash for indefinitely large inputs.
+
+Hence, here the analysis of algorithms comes into the picture! Let us now see why is the analysis of the algorithm so important :
+
+By analyzing an algorithm, we get an idea of how the algorithm will scale with the variation (change) in the input size.
+Another reason for analysis of the algorithm is to compare various algorithms for solving the same problem. Through this, we can determine which algorithm will suit best the problem. Suppose, we have 2 algorithms for a single problem, one that takes O(N2) and another that takes O(N). Then we can say that the algorithm with a time complexity of O(N) will perform much better than the one with O(N2).
+Analysis of the algorithms also helps us in understanding the space that will be taken by our code.
+
+
+What are Asymptotic Notations ?
+
+Asymptotic notations in general tell us about how good an algorithm performs when compared to another algorithm.
+
+However, we cannot simply compare two algorithms directly.
+ To compare two algorithms, factors such as the hardware and the tools we are using also have a remarkable impact. 
+ For example, the performance of algorithms varies with variations in the operating systems, the processors, etc. So, even though we’ve calculated the performance of two algorithms on a particular system, there are chances that they will perform differently on different systems.
+
+To tackle the above-stated issues, we use the asymptotic analysis to compare the space and time complexity of the algorithms. The asymptotic analysis analyzes two algorithms based on their performance when the input size is varied (increased or decreased).Big-Oh (O) notation.
+Big Omega (Ω) notation.
+Big Theta (Θ) notation.
+
+
+The above notations are used to measure the worst, best, and average time complexities of the algorithms. In the next point, we will understand them in detail.
+
+Types of Algorithm Analysis
+Till now we must already be aware that, the running time of an algorithm increases with the increase in the size of the input. However, if the running time is constant then it will remain constant, no matter what the input is.
+
+Even if the size of the input is the same sometimes, the running time of the algorithm still may vary. Hence, we perform the best, average, and worst-case analyses of the algorithms, covering all the possible cases where the algorithm may behave abruptly high or low.
+
+There are four types of analysis of algorithms. They are stated below :
+
+Best case
+Average case
+Worst case
+Amortized analysis
+Let us look at each of them in detail.
+
+
+1. Best Case Analysis of Algorithms
+The best case analysis of algorithms gives us the lower bound on the running time of the algorithm for any given input. In simple words, it states that any program will need at least (greater than or equal to) that time to run. For example, suppose we have an algorithm that has the best case time complexity is O(N), then we can say that the program will take a minimum of O(N) time to run, it can never take sometime less than that.
+
+The best case time or space complexity is often represented in terms of the Big Omega (Ω) notation.
+
+Example for Best Case Analysis :
+Let us take the example of the linear search to calculate the best time complexity. Suppose, you have an array of numbers and you have to search for a number.
+
+Find the code below for the above problem :
+
+Code :
+
+int linear_search(int arr, int l, int target) {
+    int i;
+    for (i = 0; i < l; i++) {
+        if (arr[i] == target) {
+            return arr[i]
+        }
+    }
+    return -1
+}
+
+
+Now suppose, the number you are searching for is present at the very beginning index of the array. In that case, your algorithm will take O(1) time to find the number in the best case. So, the best case complexity for this algorithm becomes O(1), and you will get your output in a constant time.
+
+How frequently do we use the best case analysis of any algorithm ?
+
+The best case is rarely necessary for measuring the runtime of the algorithms in practice. An algorithm is never created using the best-case scenario.
+
+2. Worst Case Analysis of Algorithms
+
+The worst-case analysis of algorithms gives us the upper bound on the running time of the algorithm for any given input. In simple words, it states that any program will need maximum that time (less than or equal to) to run. For example, suppose we have an algorithm that has the worst-case time complexity is O(N2), then we can say that the program will take a maximum of O(N2) time to run, for an input of size N it can never take more time than that to run.
+
+The worst-case time or space complexity is often represented in terms of the Big Oh (O) notation.
+
+Example for worst case analysis :
+
+Let us take our previous example where we were performing the linear search. Suppose, this time the element we are trying to find is at the end of the array. So, we will have to traverse the whole array before finding the element. Hence, we can say that the worst case for this algorithm is O(N) itself. Because we have to go through at most N elements before finding our target. So, this is how we calculate the worst case of the algorithms.
+
+How frequently do we use the worst-case analysis of any algorithm?
+
+In actual life, we typically analyze an algorithm’s worst-case scenario for most of the cases. The longest running time W(n) of an algorithm for any input of size n is referred to as worst-case time complexity.
+
+3. Average Case Analysis of Algorithms
+As the name suggests, the average case analysis of algorithms takes the sum of the running time on every possible input, and after that, it takes the average. So, in this case, the execution time of the algorithm acts as both the lower and upper bound. In simple terms, we can get an idea of the average running time of the algorithm through it.
+
+Generally, the average case of the algorithms is as high as the worst-case running of it. Hence, it roughly gives us an estimation of the worst case itself.
+
+The average case time or space complexity is often represented in terms of the Big theta (Θ) notation.
+
+Example for average case analysis :
+In our previous example, suppose we need to find any element which is present in the mid of our array. So, for that, we need to traverse at least the half length of the array. In other words, it will take us O(n/2) time for us to traverse the half-length. The time complexity O(n/2) is as good as O(n). That is why we say that the average case in most of the cases depicts the worst case of an algorithm.
+
+How frequently do we use the average case analysis of any algorithm ?
+
+To be precise, it is usually difficult to analyze the average case running time of an algorithm. It is simpler to calculate the worst case instead. This is mainly because it might not be a very exact thing to declare any input as the “average” input for any problem. Therefore, prior knowledge of the distribution of the input cases is necessary for a useful examination of the average behavior of an algorithm, which is necessarily an impossible condition.
+
+4. Amortized Analysis of Algorithms
+The amortized analysis of the algorithms mainly deals with the overall cost of the operations. It does not mention the complexity of any one particular operation in the sequence. The total cost of the operations is the major focus of amortized analysis.
+
+In times when only a few operations are slow but a majority of other operations are quicker, we perform an amortized analysis. Through this, we return the average running time per operation in the worst case.
+
+Example for Amortized case analysis
+A perfect example of understanding the amortized case analysis would be a hash table. You must have used or implemented the hash tables or dictionaries, in whichever language you code.
+
+So, in a hash table, for searching, the time taken is generally O(1), or constant time. However,
+ there are situations when it takes O(N) times because it has to execute that many operations to search for a value.
+
+Similarly, when we try to insert some value in a hash table, for a majority of the cases it takes a time of O(1), but still, there are cases when suppose multiple collisions occur, when it takes a time of O(N), for the collisions resolution.
+
+Other data structures we need amortized analysis are Disjoint Sets etc.
+
+How frequently do we use the amortized case analysis of any algorithm ?
+
+Whenever a single operation or very few operations runs slowly on occasion, but most of the operations run quickly and frequently, then the amortized case analysis is used.
+
+
+
+Recursive Complexity
+
+In computer science, when a function (or method or subroutine) calls itself, we call it recursion.
+
+To find out the recursive complexities of the algorithms, we perform the below steps :
+
+Step – 1 :
+Determine the number of subproblems and the parameters indicating the size of each subproblem’s input (function call with smaller input size). For example, for finding the NthNth Fibonacci number, the number of subproblems is 2, and the input size of subproblems are (N−1) and (N−2).
+Step – 2 :
+Add the time complexities of the sub-problems with the total number of fundamental operations performed at that particular stage of recursion.
+Step – 3 :
+Create a recurrence relation for the number of times the operation is done, with the proper base condition. For example, the recurrence relation for finding out the Nth Fibonacci number is T(N)=T(N−1)+T(N−2)+c.
+Step – 4 :
+Find a solution to the recurrence, or at the very least, determine how it will develop. There are many ways to analyze the recurrence relation, however, the two most popular methods for finding the solutions for the recurrence relations are Master Theorem and Recursion Tree Method.
+Note :
+A recurrence relation is an equation that defines a sequence based on some condition that gives the next term as a function of the previous terms.
+
+Recursion Tree Method
+In a recurrence tree, each node refers to the cost of a specific recurrent subproblem. We add up all of the node values to determine the algorithm’s overall complexity.
+
+Steps for solving a recurrence relation :
+
+Firstly determine the recurrence relation and draw a recursion tree on its basis.
+Next, calculate the number of levels, and the cost at each level, including the cost at the last level.
+Finally, add up the costs of all the levels to further simplify the expression.
+Suppose, we want to solve the below recurrence relation by the recurrence Tree method :
+
+T(N) = 2*T(N/2) + CN
+
+Now we can conclude the below points from the above recurrence relation :
+
+The original problem of size NN is divided into two sub-problems of the size = N/2N/2.
+Next, the overall cost of dividing the subproblem and combining its solution, for size = NN, is CNCN, where CC is a constant.
+The problem is divided into half every time until the size of the problem reduces to 1.Code Complexity
+We have already learned about the code complexity of the recursive solutions. Now, we will look at some iterative and non-iterative codes and try to determine their complexity.
+
+Constant Operations
+The constant operations such as arithmetic, boolean, and logical operations take a constant running time. The space taken by them is also constant.
+
+Look at the below examples for understanding better :
+
+Code :
+
+int a = 10 + b;
+int k = a*5
+
+Time Complexity :
+Time complexity is O(1) Because, there are no iterations or loops involved in this process. There is just a constant operation performed.
+
+Space Complexity :
+Space complexity is O(1) because we are not using any additional data structure to store our results. We are simply using variables, which take constant space in memory.
+
+If-Else Operations
+The If-Else operations also take a constant running time. Also, the space taken by them is constant.
+
+Look at the below examples for understanding better :
+
+Code :
+
+if( n> 100)
+{
+    a = a + 10;
+}
+else {
+    a = a + 5;
+}
+
+Time Complexity :
+
+Time complexity is O(1) because, there are no iterations or loops involved in this process. There are just constant if-else operations performed.
+
+
+Space Complexity :
+
+Space complexity is O(1) because we are not using any additional data structure to store our results. We are simply using variables, which take constant space in memory.
+
+for / while Loops
+The for/While Loops operations take the time complexity which is proportional to the size of the input and how many times the loop will execute. Also, the space taken by them is either constant or in terms of the space taken by the data structure(say array) to hold the values of the operations performed under the loops.
+
+Look at the below examples for understanding better :
+
+Code :
+
+for(int i=0;i<n;i++)
+{
+    a = a + i;
+}
+    Conclusion
+
+In this article, we learned about the analysis of the algorithms. Let us get a quick recap of what we learned throughout.
+
+By analyzing an algorithm, we get an idea of how the algorithm will scale with the variation (change) in the input size.
+Analysis of algorithm is also used to compare various algorithms for solving the same problem.
+There are three types of analysis of algorithms. They are the Best case, Average case, and Worst case.
+Best case analysis of algorithms gives us the lower bound on the running time of the algorithm.
+The worst-case analysis of algorithms gives us the upper bound on the running time of the algorithm
+The average case analysis of algorithms takes the sum of the running time on every possible input, and after that, it takes the average.
+The amortized analysis deals with the overall cost of the operations.
+There are various ways to calculate the recursive complexities and normal code complexities, and we discussed them in depth.
+`
+          },
+          {
+            id: 'daa2',
+            name: 'Divide and Conquer',
+            overview: 'Study the divide and conquer algorithm design paradigm and its applications.Divide and Conquer algorithm consists of a dispute using the following three steps. Divide the original problem into a set of subproblems. Conquer: Solve every subproblem individually, recursively. Combine: Put together the solutions of the subproblems to get the solution to the whole problem.How do you solve a problem using a Divide & Conquer strategy?This mechanism of solving the problem is called the Divide & Conquer Strategy. Divide and Conquer algorithm consists of a dispute using the following three steps. Divide the original problem into a set of subproblems. Conquer: Solve every subproblem individually, recursively.',
+            explanation: `Divide and Conquer is a powerful algorithmic technique where a problem is divided into smaller subproblems, solved recursively, and then combined to yield the overall solution. Key algorithms such as Merge Sort and Quick Sort are classic examples of divide and conquer. This unit explains the approach, recurrence relations, and solving them using methods like the Master Theorem.
+            Divide and Conquer is an algorithmic pattern. In algorithmic methods, the design is to take a dispute on a huge input, break the input into minor pieces, decide the problem on each of the small pieces, and then merge the piecewise solutions into a global solution. This mechanism of solving the problem is called the Divide & Conquer Strategy.
+
+Divide and Conquer algorithm consists of a dispute using the following three steps.
+
+Divide the original problem into a set of subproblems.
+Conquer: Solve every subproblem individually, recursively.
+Combine: Put together the solutions of the subproblems to get the solution to the whole problem.
+
+Examples: The specific computer algorithms are based on the Divide & Conquer approach:
+
+Maximum and Minimum Problem
+Binary Search
+Sorting (merge sort, quick sort)
+Tower of Hanoi.
+
+Fundamental of Divide & Conquer Strategy:
+There are two fundamental of Divide & Conquer Strategy:
+
+Relational Formula
+Stopping Condition
+1. Relational Formula: It is the formula that we generate from the given technique. After generation of Formula we apply D&C Strategy, i.e. we break the problem recursively & solve the broken subproblems.
+
+2. Stopping Condition: When we break the problem using Divide & Conquer Strategy, then we need to know that for how much time, we need to apply divide & Conquer. So the condition where the need to stop our recursion steps of D&C is called as Stopping Condition.
+
+Applications of Divide and Conquer Approach:
+Following algorithms are based on the concept of the Divide and Conquer Technique:
+
+Binary Search:
+
+The binary search algorithm is a searching algorithm, which is also called a half-interval search or logarithmic search. It works by comparing the target value with the middle element existing in a sorted array. After making the comparison, if the value differs, then the half that cannot contain the target will eventually eliminate, followed by continuing the search on the other half. We will again consider the middle element and compare it with the target value. The process keeps on repeating until the target value is met.
+ If we found the other half to be empty after ending the search, then it can be concluded that the target is not present in the array.
+
+Quicksort:
+
+ It is the most efficient sorting algorithm, which is also known as partition-exchange sort. It starts by selecting a pivot value from an array followed by dividing the rest of the array elements into two sub-arrays. The partition is made by comparing each of the elements with the pivot value. It compares whether the element holds a greater value or lesser value than the pivot and then sort the arrays recursively.
+
+Merge Sort:
+
+ It is a sorting algorithm that sorts an array by making comparisons. It starts by dividing an array into sub-array and then recursively sorts each of them. After the sorting is done, it merges them back.
+Closest Pair of Points: It is a problem of computational geometry.
+
+ This algorithm emphasizes finding out the closest pair of points in a metric space, given n points, such that the distance between the pair of points should be minimal.
+
+Strassen's Algorithm:
+
+It is an algorithm for matrix multiplication, which is named after Volker Strassen. It has proven to be much faster than the traditional algorithm when works on large matrices.
+
+Cooley-Tukey Fast Fourier Transform (FFT) algorithm:---
+
+
+ The Fast Fourier Transform algorithm is named after J. W. Cooley and John Turkey. It follows the Divide and Conquer Approach and imposes a complexity of O(nlogn).
+Karatsuba algorithm for fast multiplication: It is one of the fastest multiplication algorithms of the traditional time, 
+invented by Anatoly Karatsuba in late 1960 and got published in 1962. It multiplies two n-digit numbers in such a way by reducing it to at most single-digit.
+
+
+Advantages of Divide and Conquer-----
+
+
+Divide and Conquer tend to successfully solve one of the biggest problems, such as the Tower of Hanoi, a mathematical puzzle.
+ It is challenging to solve complicated problems for which you have no basic idea, but with the help of the divide and conquer approach,
+  it has lessened the effort as it works on dividing the main problem into two halves and then solve them recursively. 
+  This algorithm is much faster than other algorithms.
+It efficiently uses cache memory without occupying much space because it solves simple subproblems within the cache memory instead of accessing the slower main memory.
+It is more proficient than that of its counterpart Brute Force technique.
+Since these algorithms inhibit parallelism, 
+it does not involve any modification and is handled by systems incorporating parallel processing.
+
+Disadvantages of Divide and Conquer ---------
+
+
+Since most of its algorithms are designed by incorporating recursion, so it necessitates high memory management.
+An explicit stack may overuse the space.
+It may even crash the system if the recursion is performed rigorously greater than the stack present in the CPU.
+
+
+Max - Min Problem---
+
+Problem: Analyze the algorithm to find the maximum and minimum element from an array.
+
+Algorithm: Max ?Min Element (a [])
+Max: a [i]
+Min: a [i]
+For i= 2 to n do
+If a[i]> max then
+max = a[i]
+if a[i] < min then
+min: a[i]
+return (max, min)
+
+Analysis:
+Method 1: if we apply the general approach to the array of size n, the number of comparisons required are 2n-2.
+
+Method-2: In another approach, we will divide the problem into sub-problems and find the max and min of each group, now max. Of each group will compare with the only max of another group and min with min.
+
+Let n = is the size of items in an array
+
+Let T (n) = time required to apply the algorithm on an array of size n. Here we divide the terms as T(n/2).
+
+2 here tends to the comparison of the minimum with minimum and maximum with maximum as in above example.
+
+Max - Min Problem
+
+T (n) = 2 T Max - Min Problem → Eq (i)
+
+T (2) = 1, time required to compare two elements/items. (Time is measured in units of the number of comparisons)
+
+Max - Min Problem→ Eq (ii)
+
+Put eq (ii) in eq (i)
+
+Max - Min Problem
+
+Similarly, apply the same procedure recursively on each subproblem or anatomy
+
+{Use recursion means, we will use some stopping condition to stop the algorithm}
+
+Max - Min Problem
+
+Recursion will stop, when Max - Min Problem → (Eq. 4)
+
+Put the equ.4 into equation3.
+
+Max - Min Problem
+
+Number of comparisons requires applying the divide and conquering algorithm on n elements/items = Max - Min Problem
+
+Number of comparisons requires applying general approach on n elements = (n-1) + (n-1) = 2n-2
+
+From this example, we can analyze, that how to reduce the number of comparisons by using this technique.
+
+Analysis: suppose we have the array of size 8 elements.
+
+Method1: requires (2n-2), (2x8)-2=14 comparisons
+Method2: requires Max - Min Problem
+
+It is evident; we can reduce the number of comparisons (complexity) by using a proper technique.
+
+Binary Search-----------
+
+1. In Binary Search technique, we search an element in a sorted array by recursively dividing the interval in half.
+
+2. Firstly, we take the whole array as an interval.
+
+3. If the Pivot Element (the item to be searched) is less than the item in the middle of the interval, We discard the second half of the list and recursively repeat the process for the first half of the list by calculating the new middle and last element.
+
+4. If the Pivot Element (the item to be searched) is greater than the item in the middle of the interval, we discard the first half of the list and work recursively on the second half by calculating the new beginning and middle element.
+
+5. Repeatedly, check until the value is found or interval is empty.
+
+Analysis:
+Input: an array A of size n, already sorted in the ascending or descending order.
+Output: analyze to search an element item in the sorted array of size n.
+Logic: Let T (n) = number of comparisons of an item with n elements in a sorted array.
+Set BEG = 1 and END = n
+Find mid =Binary Search
+Compare the search item with the mid item.
+
+Case 1: item = A[mid], then LOC = mid, but it the best case and T (n) = 1
+
+Case 2: item ≠A [mid], then we will split the array into two equal parts of size Binary Search.
+
+And again find the midpoint of the half-sorted array and compare with search element.
+
+Repeat the same process until a search element is found.
+
+T (n) = Binary Search T(n/2)+1 (Equation 1)
+
+{Time to compare the search element with mid element, then with half of the selected half part of array}
+
+Merge Sort-------
+
+Merge sort is yet another sorting algorithm that falls under the category of Divide and Conquer technique. It is one of the best sorting techniques that successfully build a recursive algorithm.
+
+Divide and Conquer Strategy
+In this technique, we segment a problem into two halves and solve them individually. After finding the solution of each half, we merge them back to represent the solution of the main problem.
+
+Suppose we have an array A, such that our main concern will be to sort the subsection, which starts at index p and ends at index r, represented by A[p..r].
+
+Divide
+
+If assumed q to be the central point somewhere in between p and r, then we will fragment the subarray A[p..r] into two arrays A[p..q] and A[q+1, r].
+
+Conquer
+
+After splitting the arrays into two halves, the next step is to conquer. In this step, we individually sort both of the subarrays A[p..q] and A[q+1, r]. In case if we did not reach the base situation, then we again follow the same procedure,
+ i.e., we further segment these subarrays followed by sorting them separately.
+ 
+ 
+ 
+Pause
+
+Next
+Mute
+Current Time 
+0:18
+/
+Duration 
+7:01
+Fullscreen
+As when the base step is acquired by the conquer step, we successfully get our sorted subarrays A[p..q] and A[q+1, r], after which we merge them back to form a new sorted array [p..r].
+
+Merge Sort algorithm
+The MergeSort function keeps on splitting an array into two halves until a condition is met where we try to perform MergeSort on a subarray of size 1, i.e., p == r.
+
+And then, it combines the individually sorted subarrays into larger arrays until the whole array is merged.
+
+ALGORITHM-MERGE SORT  
+1. If p<r  
+2. Then q → ( p+ r)/2  
+3. MERGE-SORT (A, p, q)  
+4. MERGE-SORT ( A, q+1,r)  
+5. MERGE ( A, p, q, r)  
+Here we called MergeSort(A, 0, length(A)-1) to sort the complete array.
+
+As you can see in the image given below, the merge sort algorithm recursively divides the array into halves until the base condition is met, where we are left with only 1 element in the array. And then, the merge function picks up the sorted sub-arrays and merge them back to sort the entire array.`
+          },
+          {
+            id: 'daa3',
+            name: 'Greedy Algorithms',
+            overview: 'Explore greedy algorithms and their optimality conditions.The greedy method is one of the strategies like Divide and conquer used to solve the problems. This method is used for solving optimization problems. An optimization problem is a problem that demands either maximum or minimum results.',
+            explanation: `Greedy algorithms build up a solution piece by piece, always choosing the next piece that offers the most immediate benefit. This unit covers the greedy choice property and optimal substructure, explaining why greedy solutions are optimal in some problems. Examples include the Activity Selection Problem, Huffman Coding, and Minimum Spanning Trees like Kruskal's and Prim's algorithms.
+            
+            The greedy method is one of the strategies like Divide and conquer used to solve the problems. This method is used for solving optimization problems. An optimization problem is a problem that demands either maximum or minimum results. Let's understand through some terms.
+
+The Greedy method is the simplest and straightforward approach. It is not an algorithm, but it is a technique. The main function of this approach is that the decision is taken on the basis of the currently available information. Whatever the current information is present, the decision is made without worrying about the effect of the current decision in future.
+
+This technique is basically used to determine the feasible solution that may or may not be optimal. The feasible solution is a subset that satisfies the given criteria. The optimal solution is the solution which is the best and the most favorable solution in the subset. In the case of feasible, if more than one solution satisfies the given criteria then those solutions will be considered as the feasible, whereas the optimal solution is the best solution among all the solutions.
+
+Characteristics of Greedy method------
+The following are the characteristics of a greedy method:
+
+To construct the solution in an optimal way, this algorithm creates two sets where one set contains all the chosen items, and another set contains the rejected items.
+A Greedy algorithm makes good local choices in the hope that the solution should be either feasible or optimal.
+Components of Greedy Algorithm
+The components that can be used in the greedy algorithm are:
+
+Candidate set: A solution that is created from the set is known as a candidate set.
+Selection function: This function is used to choose the candidate or subset which can be added in the solution.
+Feasibility function: A function that is used to determine whether the candidate or subset can be used to contribute to the solution or not.
+Objective function: A function is used to assign the value to the solution or the partial solution.
+Solution function: This function is used to intimate whether the complete function has been reached or not.
+
+
+Applications of Greedy Algorithm----
+
+1)It is used in finding the shortest path.
+2)It is used to find the minimum spanning tree using the prim's algorithm or the Kruskal's algorithm.
+3)It is used in a job sequencing with a deadline.
+4)This algorithm is also used to solve the fractional knapsack problem.
+
+
+Pseudo code of Greedy Algorithm---
+
+
+Algorithm Greedy (a, n)  
+{  
+   Solution : = 0;  
+  for i = 0 to n do  
+  {  
+      x: = select(a);  
+     if feasible(solution, x)  
+    {  
+        Solution: = union(solution , x)  
+    }  
+       return solution;  
+  } }  
+
+
+The above is the greedy algorithm. Initially, the solution is assigned with zero value. We pass the array and number of elements in the greedy algorithm. Inside the for loop, we select the element one by one and checks whether the solution is feasible or not. If the solution is feasible, then we perform the union.
+
+Let's understand through an example.
+
+Suppose there is a problem 'P'. I want to travel from A to B shown as below:
+
+P : A → B
+
+The problem is that we have to travel this journey from A to B. There are various solutions to go from A to B. We can go from A to B by walk, car, bike, train, aeroplane, etc. There is a constraint in the journey that we have to travel this journey within 12 hrs. If I go by train or aeroplane then only, I can cover this distance within 12 hrs. There are many solutions to this problem but there are only two solutions that satisfy the constraint.
+
+If we say that we have to cover the journey at the minimum cost. This means that we have to travel this distance as minimum as possible, so this problem is known as a minimization problem. Till now, we have two feasible solutions, i.e., one by train and another one by air. Since travelling by train will lead to the minimum cost so it is an optimal solution. An optimal solution is also the feasible solution, but providing the best result so that solution is the optimal solution with the minimum cost. There would be only one optimal solution.
+
+The problem that requires either minimum or maximum result then that problem is known as an optimization problem. Greedy method is one of the strategies used for solving the optimization problems.
+
+Disadvantages of using Greedy algorithm---
+
+Greedy algorithm makes decisions based on the information available at each phase without considering the broader problem. So, there might be a possibility that the greedy solution does not give the best solution for every problem.
+
+
+An Activity Selection Problem----
+The activity selection problem is a mathematical optimization problem. Our first illustration is the problem of scheduling a resource among several challenge activities. We find a greedy algorithm provides a well designed and simple method for selecting a maximum- size set of manually compatible activities.
+
+Suppose S = {1, 2....n} is the set of n proposed activities. The activities share resources which can be used by only one activity at a time, e.g., Tennis Court, Lecture Hall, etc. Each Activity "i" has start time si and a finish time fi, where si ≤fi. If selected activity "i" take place meanwhile the half-open time interval [si,fi). Activities i and j are compatible if the intervals (si, fi) and [si, fi) do not overlap (i.e. i and j are compatible if si ≥fi or si ≥fi). The activity-selection problem chosen the maximum- size set of mutually consistent activities.
+
+Algorithm Of Greedy- Activity Selector:
+GREEDY- ACTIVITY SELECTOR (s, f)
+1. n ← length [s]
+2. A ← {1}
+3. j ← 1.
+4. for i ← 2 to n
+5. do if si ≥ fi
+6. then A ← A ∪ {i}
+7. j ← i
+8. return A
+
+Example: Given 10 activities along with their start and end time as
+
+S = (A1 A2 A3 A4 A5 A6 A7 A8 A9 A10)
+Si = (1,2,3,4,7,8,9,9,11,12)
+fi = (3,5,4,7,10,9,11,13,12,14)
+Compute a schedule where the greatest number of activities takes place.
+
+Solution: The solution to the above Activity scheduling problem using a greedy strategy is illustrated below:
+
+Arranging the activities in increasing order of end time
+
+Now, schedule A1
+
+Next schedule A3 as A1 and A3 are non-interfering.
+
+Next skip A2 as it is interfering.
+
+Next, schedule A4 as A1 A3 and A4 are non-interfering, then next, schedule A6 as A1 A3 A4 and A6 are non-interfering.
+
+Skip A5 as it is interfering.
+
+Next, schedule A7 as A1 A3 A4 A6 and A7 are non-interfering.
+
+Next, schedule A9 as A1 A3 A4 A6 A7 and A9 are non-interfering.
+
+Skip A8 as it is interfering.
+
+Next, schedule A10 as A1 A3 A4 A6 A7 A9 and A10 are non-interfering.
+
+Thus the final Activity schedule is:
+(A1,A3,A4,A5,A6,A7,A9.A10).
+`
+          },
+          {
+            id: 'daa4',
+            name: 'Knacpsack Problem',
+            overview: 'Learn About fractional knapscak problem , Brute-force approach,Greedy approach: .',
+            explanation: `This problem can be solved with the help of using two techniques:
+            Brute-force approach: The brute-force approach tries all the possible solutions with all the different fractions but it is a time-consuming approach.
+            Greedy approach: In Greedy approach, we calculate the ratio of profit/weight, and accordingly, we will select the item. 
+            The item with the highest ratio would be selected first.
+            There are basically three approaches to solve the problem:The first approach is to select the item based on the maximum profit.
+            The second approach is to select the item based on the minimum weight.
+            
+            The Brute Force Approach
+Using brute force means to just check all possibilities, looking for the best result. This is usually the most straight forward way of solving a problem, but it also requires the most calculations.
+
+To solve the 0/1 Knapsack Problem using brute force means to:
+
+Calculate the value of every possible combination of items in the knapsack.
+Discard the combinations that are heavier than the knapsack weight limit.
+Choose the combination of items with the highest total value.
+How it works:
+
+Consider each item one at a time.
+If there is capacity left for the current item, add it by adding its value and reducing the remaining capacity with its weight. Then call the function on itself for the next item.
+Also, try not adding the current item before calling the function on itself for the next item.
+Return the maximum value from the two scenarios above (adding the current item, or not adding it).
+
+Solving the 0/1 Knapsack Problem using recursion and brute force:
+
+def knapsack_brute_force(capacity, n):
+    print(f"knapsack_brute_force({capacity},{n})")
+    if n == 0 or capacity == 0:
+        return 0
+
+    elif weights[n-1] > capacity:
+        return knapsack_brute_force(capacity, n-1)
+
+    else:
+        include_item = values[n-1] + knapsack_brute_force(capacity-weights[n-1], n-1)
+        exclude_item = knapsack_brute_force(capacity, n-1)
+        return max(include_item, exclude_item)
+
+values = [300, 200, 400, 500]
+weights = [2, 1, 5, 3]
+capacity = 10
+n = len(values)
+
+print("\nMaximum value in Knapsack =", knapsack_brute_force(capacity, n))
+Running the code above means that the knapsack_brute_force function is called many times recursively. You can see that from all the printouts.
+
+Every time the function is called, it will either include the current item n-1 or not.
+
+Line 2: This print statement shows us each time the function is called.
+
+Line 3-4: If we run out of items to check (n==0), or we run out of capacity (capacity==0), we do not do any more recursive calls because no more items can be added to the knapsack at this point.
+
+Line 6-7: If the current item is heavier than the capacity (weights[n-1] > capacity), forget the current item and go to the next item.
+
+Line 10-12: If the current item can be added to the knapsack, see what gives you the highest value: adding the current item, or not adding the current item.
+
+Note: In the recursion tree above, writing the real function name knapsack_brute_force(7,3) would make the drawing too wide, so "ks(7,3)" or "knapsack(7,3)" is written instead.
+
+From the recursion tree above, it is possible to see that for example taking the crown, the cup, and the globe, means that there is no space left for the microscope (2 kg), and that gives us a total value of 200+400+500=1100.
+
+We can also see that only taking the microscope gives us a total value of 300 (right bottom gray box).
+
+As you can see in the recursion tree above, and by running the example code, the function is sometimes called with the same arguments, like knapsack_brute_force(2,0) is for example called two times. We avoid this by using memoization.
+
+The Memoization Approach (top-down)
+The memoization technique stores the previous function call results in an array, so that previous results can be fetched from that array and does not have to be calculated again.
+
+Read more about memoization here.
+
+Memoization is a 'top-down' approach because it starts solving the problem by working its way down to smaller and smaller subproblems.
+
+In the brute force example above, the same function calls happen only a few times, so the effect of using memoization is not so big. But in other examples with far more items to choose from, the memoization technique would be more helpful.
+
+How it works:
+
+In addition to the initial brute force code above, create an array memo to store previous results.
+For every function call with arguments for capacity c and item number i, store the result in memo[c,i].
+To avoid doing the same calculation more than once, every time the function is called with arguments c and i, check first if the result is already stored in memo[c,i].
+After improving the brute force implementation with the use of memoization, the code now looks like this:
+
+Example
+Improved solution to the 0/1 Knapsack Problem using memoization:
+
+def knapsack_memoization(capacity, n):
+    print(f"knapsack_memoization({n}, {capacity})")
+    if memo[n][capacity] is not None:
+        print(f"Using memo for ({n}, {capacity})")
+        return memo[n][capacity]
+    
+    if n == 0 or capacity == 0:
+        result = 0
+    elif weights[n-1] > capacity:
+        result = knapsack_memoization(capacity, n-1)
+    else:
+        include_item = values[n-1] + knapsack_memoization(capacity-weights[n-1], n-1)
+        exclude_item = knapsack_memoization(capacity, n-1)
+        result = max(include_item, exclude_item)
+
+    memo[n][capacity] = result
+    return result
+
+values = [300, 200, 400, 500]
+weights = [2, 1, 5, 3]
+capacity = 10
+n = len(values)
+
+memo = [[None]*(capacity + 1) for _ in range(n + 1)]
+
+print("\nMaximum value in Knapsack =", knapsack_memoization(capacity, n))
+The highlighted lines in the code above show the memoization technique used to improve the previous brute force implementation.
+
+Line 24: Create an array memo where previous results are stored.
+
+Line 3-5: At the start of the function, before doing any calculations or recursive calls, check if the result has already been found and stored in the memo array.
+
+Line 16: Store the result for later.
+
+The Tabulation Approach (bottom-up)
+Another technique to solve the 0/1 Knapsack problem is to use something called tabulation. This approach is also called the iterative approach, and is a technique used in Dynamic Programming.
+
+Tabulation solves the problem in a bottom-up manner by filling up a table with the results from the most basic subproblems first. The next table values are filled in using the previous results.
+
+How it works:
+
+Consider one item at a time, and increase the knapsack capacity from 0 to the knapsack limit.
+If the current item is not too heavy, check what gives the highest value: adding it, or not adding it. Store the maximum of these two values in the table.
+In case the current item is too heavy to be added, just use the previously calculated value at the current capacity where the current item was not considered.
+Use the animation below to see how the table is filled cell by cell using previously calculated values until arriving at the final result.
+
+Find the maximum value in the knapsack.
+Click "Run" to fill the table.
+After the table is filled, click a cell value to see the calculation.
+Weights (kg)Knapsack capacities (kg)Values ($)
+0123456789102153300200400500000000000000000
+Maximum Value in Knapsack:
+
+Speed: 
+
+Run
+The tabulation approach works by considering one item at a time, for increasing knapsack capacities. In this way the solution is built up by solving the most basic subproblems first.
+
+On each row an item is considered to be added to knapsack, for increasing capacities.
+
+Example
+Improved solution to the 0/1 Knapsack Problem using tabulation:
+
+def knapsack_tabulation():
+    n = len(values)
+    tab = [[0]*(capacity + 1) for y in range(n + 1)]
+
+    for i in range(1, n+1):
+        for w in range(1, capacity+1):
+            if weights[i-1] <= w:
+                include_item = values[i-1] + tab[i-1][w-weights[i-1]]
+                exclude_item = tab[i-1][w]
+                tab[i][w] = max(include_item, exclude_item)
+            else:
+                tab[i][w] = tab[i-1][w]
+    
+    for row in tab:
+    	  print(row)
+    return tab[n][capacity]
+
+values = [300, 200, 400, 500]
+weights = [2, 1, 5, 3]
+capacity = 10
+print("\nMaximum value in Knapsack =", knapsack_tabulation())
+Line 7-10: If the item weight is lower than the capacity it means it can be added. Check if adding it gives a higher total value than the result calculated in the previous row, which represents not adding the item. Use the highest (max) of these two values. In other words: Choose to take, or not to take, the current item.
+
+Line 8: This line might be the hardest to understand. To find the value that corresponds to adding the current item, we must use the current item's value from the values array. But in addition, we must reduce the capacity with the current item's weight, to see if the remaining capacity can give us any additional value. This is similar to check if other items can be added in addition to the current item, and adding the value of those items.
+
+Line 12: In case the current item is heavier than the capacity (too heavy), just fill in the value from the previous line, which represents not adding the current item.
+
+Manual Run Through
+Here is a list of explanations to how a few of the table values are calculated. You can click the corresponding table cell in the animation above to get a better understanding as you read.
+
+Microscope, capacity 1 kg: For the first value calculated, it is checked whether the microscope can be put in the bag if the weight limit is 1 kg. The microscope weighs 2 kg, it is too heavy, and so the value 0 is just copied from the cell above which corresponds to having no items in the knapsack. Only considering the microscope for a bag with weight limit 1 kg, means we cannot bring any items and we must leave empty handed with a total value of $ 0.
+
+Microscope, capacity 2 kg: For the second value calculated, we are able to fit the microscope in the bag for a weight limit of 2 kg, so we can bring it, and the total value in the bag is $ 300 (the value of the microscope). And for higher knapsack capacities, only considering the microscope, means we can bring it, and so all other values in that row is $ 300.
+
+Globe, capacity 1 kg: Considering the globe at 1 kg and a knapsack capacity at 1 kg means that we can bring the globe, so the value is $ 200. The code finds the maximum between bringing the globe which gives us $ 200, and the previously calculated value at 1 kg capacity, which is $ 0, from the cell above. In this case it is obvious that we should bring the globe because that is the only item with such a low weight, but in other cases the previously calculated value at the same capacity might be higher.
+
+Globe, capacity 2 kg: At capacity 2 kg, the code sees that the globe can fit, which gives us a value of $ 200, but then the microscope cannot fit. And adding the microscope for a capacity of 2 kg gives us a value of $ 300, which is higher, so taking the microscope (value from the cell above) is the choice to maximize knapsack value for this table cell.
+
+Globe, capacity 3 kg: Considering the globe with a capacity of 3 kg, means that we can take the globe, but with the remaining capacity of 2 kg we can also take the microscope. In this cell, taking both the globe and the microscope gives us a higher value 200+300=500 than taking just the microscope (as calculated on the previous line), so both items are taken and the cell value is 500.
+
+Which Items Gives Us The Highest Value?
+After filling out the table and finding the maximum value the knapsack can have, it is not obvious which items we need to pack with us to get that value.
+
+To find the included items, we use the table we have created, and we start with the bottom right cell with the highest value, in our case the cell with value 1200 in it.
+
+Steps to find the included items:
+
+Start with bottom right cell (the cell with the highest value).
+If the cell above has the same value, it means that this row's item is not included, and we go to the cell above.
+If the cell above has a different value, it means that the current row's item is included, and we move to the row above, and we move to the left as many times as the weight of the included item.
+Continue to do steps 2 and 3 until a cell with value 0 is found.
+
+Time Complexity
+The three approaches to solving the 0/1 Knapsack Problem run differently, and with different time complexities.
+
+Brute Force Approach: This is the slowest of the three approaches. The possibilities are checked recursively, with the time complexity 
+O
+(
+2
+n
+)
+, where 
+n
+ is the number of potential items we can pack. This means the number of computations double for each extra item that needs to be considered.
+
+Memoization Approach: Saves computations by remembering previous results, which results in a better time complexity 
+O
+(
+n
+⋅
+C
+)
+, where 
+n
+ is the number of items, and 
+C
+ is the knapsack capacity. This approach runs otherwise in the same recursive way as the brute force approach.
+
+Tabulation Approach: Has the same time complexity as the memoization approach 
+O
+(
+n
+⋅
+C
+)
+, where 
+n
+ is the number of items, and 
+C
+ is the knapsack capacity, but memory usage and the way it runs is more predictable, which normally makes the tabulation approach the most favorable.
+
+Note: Memoization and tabulation are used in something called dynamic programming, which is a powerful technique used in computer science to solve problems. To use dynamic programming to solve a problem, the problem must consist of overlapping subproblems, and that is why it can be used to solve the 0/1 Knapsack Problem, as you can see above in the memoization and tabulation approaches.
+
+`,
+          },
+          {
+            id: 'daa5',
+            name: 'Red -Black Tree',
+            overview: 'Explore Red-black tree and their optimality conditions.A Red Black Tree is a category of the self-balancing binary search tree. It was created in 1972 by Rudolf Bayer who termed them "symmetric binary B-trees."A red-black tree is a Binary tree where a particular node has color as an extra attribute, either red or black. By check the node colors on any simple path from the root to a leaf, red-black trees secure that no such path is higher than twice as long as any other so that the tree is generally balanced.',
+            explanation: `A Red Black Tree is a category of the self-balancing binary search tree. It was created in 1972 by Rudolf Bayer who termed them "symmetric binary B-trees."
+
+A red-black tree is a Binary tree where a particular node has color as an extra attribute, either red or black. By check the node colors on any simple path from the root to a leaf, red-black trees secure that no such path is higher than twice as long as any other so that the tree is generally balanced.
+
+Properties of Red-Black Trees
+A red-black tree must satisfy these properties:
+
+1)The root is always black.
+2)A nil is recognized to be black. This factor that every non-NIL node has two children.
+3)Black Children Rule: The children of any red node are black.
+4)Black Height Rule: For particular node v, there exists an integer bh (v) such that specific downward path from v to a nil has correctly bh (v) black real (i.e. non-nil) nodes. Call this portion the black height of v. 
+5)We determine the black height of an RB tree to be the black height of its root.
+
+1.Rotation--
+
+LEFT ROTATE (T, x)
+1. y ← right [x]
+1. y ← right [x]
+2. right [x] ← left [y]
+3. p [left[y]] ← x
+4. p[y] ← p[x]
+5. If p[x] = nil [T]
+then root [T] ← y
+else if x = left [p[x]]
+then left [p[x]] ← y
+else right [p[x]] ← y
+6. left [y] ← x.
+7. p [x] ← y.
+
+
+2. Insertion:
+Insert the new node the way it is done in Binary Search Trees.
+Color the node red
+If an inconsistency arises for the red-black tree, fix the tree according to the type of discrepancy.
+A discrepancy can decision from a parent and a child both having a red color. This type of discrepancy is determined by the location of the node concerning grandparent, and the color of the sibling of the parent.
+
+RB-INSERT (T, z)
+1. y ← nil [T]
+2. x ← root [T]
+3. while x ≠ NIL [T]
+4. do y ← x
+5. if key [z] < key [x]
+6. then x ← left [x]
+7. else x ← right [x]
+8. p [z] ← y
+9. if y = nil [T]
+10. then root [T] ← z
+11. else if key [z] < key [y]
+12. then left [y] ← z
+13. else right [y] ← z
+14. left [z] ← nil [T]
+15. right [z] ← nil [T]
+16. color [z] ← RED
+17. RB-INSERT-FIXUP (T, z)
+
+
+After the insert new node, Coloring this new node into black may violate the black-height conditions and coloring this new node into red may violate coloring conditions i.e. root is black and red node has no red children. We know the black-height violations are hard. So we color the node red. After this, if there is any color violation, then we have to correct them by an RB-INSERT-FIXUP procedure.
+
+RB-INSERT-FIXUP (T, z)
+1. while color [p[z]] = RED
+2. do if p [z] = left [p[p[z]]]
+3. then y ← right [p[p[z]]]
+4. If color [y] = RED
+5. then color [p[z]] ← BLACK //Case 1
+6. color [y] ← BLACK //Case 1
+7. color [p[z]] ← RED //Case 1
+8. z ← p[p[z]] //Case 1
+9. else if z= right [p[z]]
+10. then z ← p [z] //Case 2
+11. LEFT-ROTATE (T, z) //Case 2
+12. color [p[z]] ← BLACK //Case 3
+13. color [p [p[z]]] ← RED //Case 3
+14. RIGHT-ROTATE (T,p [p[z]]) //Case 3
+15. else (same as then clause)
+With "right" and "left" exchanged
+16. color [root[T]] ← BLACK
+
+
+
+3. Deletion:
+First, search for an element to be deleted
+
+If the element to be deleted is in a node with only left child, swap this node with one containing the largest element in the left subtree. (This node has no right child).
+If the element to be deleted is in a node with only right child, swap this node with the one containing the smallest element in the right subtree (This node has no left child).
+If the element to be deleted is in a node with both a left child and a right child, then swap in any of the above two ways. While swapping, swap only the keys but not the colors.
+The item to be deleted is now having only a left child or only a right child. Replace this node with its sole child. This may violate red constraints or black constraint. Violation of red constraints can be easily fixed.
+If the deleted node is black, the black constraint is violated. The elimination of a black node y causes any path that contained y to have one fewer black node.
+Two cases arise:
+The replacing node is red, in which case we merely color it black to make up for the loss of one black node.
+The replacing node is black.
+The strategy RB-DELETE is a minor change of the TREE-DELETE procedure. After splicing out a node, it calls an auxiliary procedure RB-DELETE-FIXUP that changes colors and performs rotation to restore the red-black properties.
+
+RB-DELETE (T, z)
+1. if left [z] = nil [T] or right [z] = nil [T]
+2. then y ← z
+3. else y ← TREE-SUCCESSOR (z)
+4. if left [y] ≠ nil [T]
+5. then x ← left [y]
+6. else x ← right [y]
+7. p [x] ← p [y]
+8. if p[y] = nil [T]
+9. then root [T] ← x
+10. else if y = left [p[y]]
+11. then left [p[y]] ← x
+12. else right [p[y]] ← x
+13. if y≠ z
+14. then key [z] ← key [y]
+15. copy y's satellite data into z
+16. if color [y] = BLACK
+17. then RB-delete-FIXUP (T, x)
+18. return y
+
+RB-DELETE-FIXUP (T, x)
+1. while x ≠ root [T] and color [x] = BLACK
+2. do if x = left [p[x]]
+3. then w ← right [p[x]]
+4. if color [w] = RED
+5. then color [w] ← BLACK //Case 1
+6. color [p[x]] ← RED //Case 1
+7. LEFT-ROTATE (T, p [x]) //Case 1
+8. w ← right [p[x]] //Case 1
+9. If color [left [w]] = BLACK and color [right[w]] = BLACK
+10. then color [w] ← RED //Case 2
+11. x ← p[x] //Case 2
+12. else if color [right [w]] = BLACK
+13. then color [left[w]] ← BLACK //Case 3
+14. color [w] ← RED //Case 3
+15. RIGHT-ROTATE (T, w) //Case 3
+16. w ← right [p[x]] //Case 3
+17. color [w] ← color [p[x]] //Case 4
+18. color p[x] ← BLACK //Case 4
+19. color [right [w]] ← BLACK //Case 4
+20. LEFT-ROTATE (T, p [x]) //Case 4
+21. x ← root [T] //Case 4
+22. else (same as then clause with "right" and "left" exchanged)
+23. color [x] ← BLACK
+
+
+`,
+          },
+          {
+            id: 'daa6',
+            name: 'Sorting',
+            overview: 'Learn about Binary Heap,Quick Sort,Stable Sorting.',
+            explanation: `Introduction---- 
+             Sorting algorithms are fundamental in computer science and data structures & algorithms (DSA).
+             These play a crucial role in organizing data efficiently. Sorting in data structures helps arrange elements in a specific order, making it easier to search, analyze, and visualize information. 
+             Let’s learn about the various types of sorting algorithms, their workings, and their importance in solving real-world problems.
+             What are Sorting Algorithms?Sorting algorithms in data structure are methods used to arrange data in a specific order, like ascending or descending. Uses and Importance of Data Structure Sorting
+             The main purpose of sorting algorithms is to make data easier to work with. When data is sorted, it becomes faster to search for items, easier to read, and more efficient to process. 
+             For example, finding a name in a sorted list is quicker than finding it in an unsorted list. 
+             Sorting is also important because it is often a first step in many other algorithms and data operations.
+
+             Sorting algorithms have many real-world applications:
+             
+             In Schools: Sorting helps organize student names alphabetically for easy attendance trackingeCommerce Sites: Sort algorithms arrange products by price, popularity, or rating to help customers find what they need quickly.
+             Libraries: Books are sorted by title or author name to make it easy to locate a specific book.
+             Databases: Sorting data in databases makes searching for information faster and more efficieSports:
+              Sorting scores or times helps rank athletes from best to worst.
+              Finance: Sorting stock prices or transaction records helps in analyzing financial data.
+              
+              Classification of Sort Algorithms
+We can classify the various types of sorting in data structure as:
+
+1. Based on Comparison:
+Comparison-based Sorting: These algorithms sort data by comparing elements. Examples include Bubble Sort, Selection Sort, Insertion Sort, Merge Sort, Quick Sort, and Heap Sort.
+
+Non-comparison-based Sorting: These algorithms sort data without comparing elements directly. Examples include Counting Sort, Radix Sort, and Bucket Sort.
+
+2. Based on Stability
+Stable Sorting Algorithms: Stable sort algorithms maintain the relative order of equal elements. Examples include Bubble Sort, Merge Sort, and Insertion Sort.
+
+Unstable Sorting Algorithms: Unstable sort algorithms do not guarantee the relative order of equal elements. Examples include Quick Sort, Heap Sort, and Selection Sort.
+
+Types of Sorting Algorithms in Data Structure
+These are the main types of sorting in data structures:
+
+1. Comparison-based:
+Bubble sort
+
+Selection sort
+
+Insertion sort
+
+Merge sort
+
+Quick sort
+
+Heap sort
+
+2. Non-comparison-based:
+Counting sort
+
+Radix sort
+
+Bucket sort
+
+Characteristics of Sorting Algorithms
+Let’s know about the main characteristics and properties of algorithms of sorting:
+
+1. Stability
+Stable: maintains the relative order of equal elements.
+
+Unstable: may change the relative order of equal elements.
+
+2. Recursive vs. Iterative
+Recursive: uses recursive calls (e.g., Merge Sort, Quick Sort).
+
+Iterative: uses loops (e.g., Bubble Sort, Selection Sort).
+
+3. Adaptive vs. Non-Adaptive
+Adaptive: performs better on partially sorted data (e.g., Insertion Sort).
+
+Non-Adaptive: does not take advantage of pre-existing order (e.g., Selection Sort).
+
+4. Internal vs. External
+Internal: all data fits into memory (e.g., most common sorting algorithms).
+
+External: used for large datasets that don't fit into memory (e.g., External Merge Sort).
+
+Bubble Sort
+Bubble Sort is a simple sorting algorithm that repeatedly steps through the list to be sorted, compares adjacent elements, and swaps them if they are in the wrong order. The process is repeated until the list is sorted. It is called Bubble Sort because smaller elements "bubble" to the top of the list.
+
+Example:
+Consider the list [4, 2, 7, 1].
+
+First pass:
+Compare 4 and 2, swap to get [2, 4, 7, 1]
+
+Compare 4 and 7, no swap
+
+Compare 7 and 1, swap to get [2, 4, 1, 7]
+
+Second pass:
+Compare 2 and 4, no swap
+
+Compare 4 and 1, swap to get [2, 1, 4, 7]
+
+Third pass:
+Compare 2 and 1, swap to get [1, 2, 4, 7]
+
+Fourth pass:
+List is already sorted, no swaps needed
+
+Final sorted list: [1, 2, 4, 7].
+
+
+Use Cases of Bubble Sorting
+Used to teach the basics of sorting algorithms and algorithm analysis due to its simplicity.
+
+Suitable for small datasets where its simplicity outweighs its inefficiency.
+
+Performs well on data that is already partially sorted, as it can quickly detect the order and terminate early
+
+Selection Sort---
+
+Selection Sort is a simple comparison-based sorting algorithm. It divides the list into two parts: the sorted part at the beginning and the unsorted part at the end. 
+
+The algorithm repeatedly selects the smallest (or largest, depending on sorting order) element from the unsorted part and swaps it with the first element of the unsorted part, effectively growing the sorted part by one element with each iteration.
+
+Example:
+Consider the list [4, 2, 7, 1].
+
+First pass:
+Find the minimum element in [4, 2, 7, 1], which is 1
+
+Swap 1 with 4 to get [1, 2, 7, 4]
+
+Second pass:
+Find the minimum element in [2, 7, 4], which is 2
+
+Swap 2 with 2 to get [1, 2, 7, 4] (no change)
+
+Third pass:
+Find the minimum element in [7, 4], which is 4
+
+Swap 4 with 7 to get [1, 2, 4, 7]
+
+Fourth pass:
+The last element 7 is already in place, no need to swap
+
+Final sorted list: [1, 2, 4, 7].
+
+Insertion Sort
+Insertion Sort is a simple comparison-based sorting algorithm that builds the final sorted list one element at a time. It works similarly to the way you might sort playing cards in your hands. 
+
+The algorithm takes one element from the unsorted portion of the list and inserts it into its correct position in the sorted portion. This process is repeated until the entire list is sorted.
+
+Example:
+Consider the list [4, 2, 7, 1].
+
+First pass (i = 1):
+Key is 2. Compare 2 with 4.
+
+2 is less than 4, so move 4 to the right and insert 2 at the beginning to get [2, 4, 7, 1].
+
+Second pass (i = 2):
+Key is 7. Compare 7 with 4.
+
+7 is greater than 4, so no movement needed. List remains [2, 4, 7, 1].
+
+Third pass (i = 3):
+Key is 1. Compare 1 with 7, 4, and 2.
+
+1 is less than 7, move 7 to the right.
+
+1 is less than 4, move 4 to the right.
+
+1 is less than 2, move 2 to the right.
+
+Insert 1 at the beginning to get [1, 2, 4, 7].
+
+Final sorted list: [1, 2, 4, 7].
+
+Merge Sort
+Merge Sort is a divide-and-conquer algorithm that sorts a list by dividing it into smaller sublists, sorting those sublists, and then merging them back together. It works by recursively splitting the list into halves until each sublist has only one element, which is inherently sorted. Then, it merges the sorted sublists back together to produce the final sorted list.
+
+Example:
+Consider the list [4, 2, 7, 1].
+
+Divide: Split the list into two halves:
+
+Left half: [4, 2]
+
+Right half: [7, 1]
+
+Recursive Sort:
+Split [4, 2] into [4] and [2]
+
+Split [7, 1] into [7] and [1]
+
+Since each sublist has only one element, they are inherently sorted.
+
+Merge:
+Merge [4] and [2] to form [2, 4]
+
+Merge [7] and [1] to form [1, 7]
+
+Final Merge:
+Merge [2, 4] and [1, 7]:
+
+Compare 2 and 1, place 1 first.
+
+Compare 2 and 7, place 2 next.
+
+Compare 4 and 7, place 4 next.
+
+Place remaining 7.
+
+Final sorted list: [1, 2, 4, 7].
+
+Quick Sort
+Quick Sort is a highly efficient divide-and-conquer sorting algorithm. It works by selecting a 'pivot' element from the list and partitioning the other elements into two sub-arrays: those less than the pivot and those greater than the pivot. 
+
+The pivot element is then in its final sorted position. The algorithm then recursively sorts the sub-arrays.
+
+Example:
+Consider the list [4, 2, 7, 1].
+
+Choose Pivot: Select the middle element as the pivot (pivot = 7).
+
+Partition:
+Left sub-array: Elements less than pivot [4, 2, 1]
+
+Middle sub-array: Elements equal to pivot [7]
+
+Right sub-array: Elements greater than pivot []
+
+Recursive Sort:
+Sort the left sub-array [4, 2, 1]:
+
+Choose pivot (pivot = 2)
+
+Partition into [1], [2], [4]
+
+Sort [1] and [4] which are already sorted
+
+No need to sort the right sub-array as it is empty.
+
+Combine:
+Combine the sorted left sub-array [1, 2, 4], middle sub-array [7], and right sub-array [].
+
+Final sorted list: [1, 2, 4, 7].
+
+Heap Sort
+Heap Sort is a comparison-based sorting algorithm that uses a binary heap data structure. It divides the input into a sorted and an unsorted region and iteratively shrinks the unsorted region by extracting the largest element and moving it to the sorted region. 
+
+The binary heap is a complete binary tree that satisfies the heap property: in a max heap, each parent node is greater than or equal to its children.
+
+Example:
+Consider the list [4, 2, 7, 1].
+
+Build Max Heap:
+Heapify the list to form a max heap.
+
+After heapify: [7, 4, 2, 1] (7 is the largest element and is at the root of the heap).
+
+Sort the Heap:
+Swap the root (largest element) with the last element in the heap: [1, 4, 2, 7].
+
+Reduce the heap size by one and heapify the root: [4, 1, 2, 7].
+
+Continue this process:
+Swap root with the last element: [2, 1, 4, 7].
+
+Heapify: [2, 1, 4, 7] (already a max heap).
+
+Swap root with the last element: [1, 2, 4, 7].
+
+Heapify: [1, 2, 4, 7] (already a max heap).
+
+Final sorted list: [1, 2, 4, 7].
+
+Counting Sort
+Counting Sort is a non-comparison-based sorting algorithm that sorts integers within a specific range. It works by counting the number of occurrences of each distinct element and using this information to place elements in their correct positions in the output array.
+
+Example:
+Consider the list [4, 2, 2, 8, 3, 3, 1].
+
+Count occurrences: [1, 2, 2, 1, 1] (for elements 1, 2, 3, 4, 8).
+
+Compute cumulative counts: [1, 3, 5, 6, 7].
+
+Place elements in the correct positions: [1, 2, 2, 3, 3, 4, 8].
+
+Use Cases:
+Suitable for sorting integers with a known, limited range.
+
+Often used in digital signal processing and certain counting applications.
+
+Radix Sort
+Radix Sort is a non-comparison-based sorting algorithm that sorts numbers by processing individual digits. It processes digits from the least significant to the most significant (LSD) or vice versa (MSD).
+
+Example:
+Consider the list [170, 45, 75, 90, 802, 24, 2, 66].
+
+Sort by least significant digit (LSD): [170, 90, 802, 2, 24, 45, 75, 66].
+
+Sort by next digit: [802, 2, 24, 45, 66, 170, 75, 90].
+
+Sort by most significant digit: [2, 24, 45, 66, 75, 90, 170, 802].
+
+Use Cases:
+Efficient for sorting large lists of numbers.
+
+Commonly used in card sorting algorithms and other applications with fixed digit lengths.
+
+Bucket Sort
+Bucket Sort is distributes elements into buckets and then sorts these buckets individually. It is often used when the input is uniformly distributed over a range.
+
+Example:
+Consider the list [0.78, 0.17, 0.39, 0.26, 0.72, 0.94, 0.21, 0.12, 0.23, 0.68].
+
+Distribute into buckets: [[0.17, 0.12, 0.21, 0.23], [0.26, 0.39], [0.68, 0.72, 0.78], [0.94]].
+
+Sort each bucket: [[0.12, 0.17, 0.21, 0.23], [0.26, 0.39], [0.68, 0.72, 0.78], [0.94]].
+
+Concatenate buckets: [0.12, 0.17, 0.21, 0.23, 0.26, 0.39, 0.68, 0.72, 0.78, 0.94].
+
+Use Cases:
+Effective for sorting uniformly distributed data.
+
+Used in graphics and computational geometry for sorting points in space.
+
+Suitable for sorting floating-point numbers in a specific range.
+
+Applications of Sorting Methods in Data Structure
+These are the practical uses and applications of sorting techniques in data structure:
+
+1. Database Management
+Sorting records to enable faster searches and queries.
+
+Indexing databases for efficient data retrieval.
+
+2. Search Algorithms
+Improving the efficiency of search algorithms like Binary Search, which requires sorted data.
+
+3. Data Analysis
+Organizing data for statistical analysis and visualization.
+
+Preparing data for machine learning algorithms that require sorted inputs.
+
+4. E-commerce and Retail
+Sorting products by price, popularity, ratings, or other criteria to enhance user experience.
+
+Managing inventory and restocking items based on sales data.
+
+5. Computer Graphics
+Rendering scenes efficiently by sorting objects based on their depth (Z-ordering) for correct rendering order.
+
+Sorting vertices for rasterization processes in graphics pipelines.
+
+6. Operating Systems
+Scheduling tasks and processes based on priority.
+
+Managing memory allocation by sorting free and occupied memory blocks.
+
+7. Networking
+Sorting packets based on priority or time stamps for efficient routing.
+
+Organizing data in network buffers.
+
+8. Telecommunications
+Sorting call records, message logs, and user data for billing and analysis.
+
+Managing bandwidth allocation by prioritizing data packets.
+
+9. Finance and Trading
+Analyzing stock prices, trading volumes, and market trends by sorting financial data.
+
+Automating trading strategies that require sorted data for decision-making.
+
+10. Social Media
+Sorting posts, comments, and messages by time, popularity, or relevance.
+
+Managing user feeds and notifications.`,
+          },
+
+        ]
+      },
+
+      {
+        id: 'python',
+        name: 'Python Programming',
+        units: [
+          {
+            id: 'py1',
+            name: 'Python Basics',
+            overview: 'Learn syntax, variables, and data types.',
+            explanation: 'Detailed coverage of fundamental Python syntax, indentation importance, data types, and variable assignments.'
+          },
+          {
+            id: 'py2',
+            name: 'Control Structures',
+            overview: 'Understand if, else, loops, and control flow.',
+            explanation: 'Explanation with examples of conditionals, loops like for and while, and control statements.'
+          }
+        ]
+      },
+
+
+
+
+
+
+
+
+
+
+
+
+
+      {
+        id: 'Cnn',
+        name: 'Computer Network',
+        units: [
+          {
+            id: 'cnn1',
+            name: 'Computer Basic',
+            overview: 'Learn syntax, variables, and data types.',
+            explanation: 'Detailed coverage of fundamental Python syntax, indentation importance, data types, and variable assignments.'
+          },
+          {
+            id: 'cnn2',
+            name: 'Computer Hardware & Software',
+            overview: 'Understand if, else, loops, and control flow.',
+            explanation: 'Explanation with examples of conditionals, loops like for and while, and control statements.'
+          },
+          {
+            id: 'cnn3',
+            name: 'Computer Data Storage',
+            overview: 'Understand if, else, loops, and control flow.',
+            explanation: 'Explanation with examples of conditionals, loops like for and while, and control statements.'
+          },
+          {
+            id: 'cnn4',
+            name: 'Computer Memory',
+            overview: 'Understand if, else, loops, and control flow.',
+            explanation: 'Explanation with examples of conditionals, loops like for and while, and control statements.'
+          },
+
+          {
+            id: 'cnn4',
+            name: 'Computer Internet & Intranet',
+            overview: 'Understand if, else, loops, and control flow.',
+            explanation: 'Explanation with examples of conditionals, loops like for and while, and control statements.'
+          },    
+          {
+            id: 'cnn4',
+            name: 'Operating System',
+            overview: 'Understand if, else, loops, and control flow.',
+            explanation: 'Explanation with examples of conditionals, loops like for and while, and control statements.'
+          },
+          {
+            id: 'cnn5',
+            name: 'Virus & Antivirus',
+            overview: 'Understand if, else, loops, and control flow.',
+            explanation: 'Explanation with examples of conditionals, loops like for and while, and control statements.'
+          },
+          {
+            id: 'cnn6',
+            name: 'Networking Device',
+            overview: 'Understand if, else, loops, and control flow.',
+            explanation: 'Explanation with examples of conditionals, loops like for and while, and control statements.'
+          }
+        ]
+      },
+
+
+
+
+
+
+
+
+
+
+
+
+
+      {
+        id: 'discrete',
+        name: 'Discrete Mathematics',
+        units: [
+          {
+            id: 'dm1',
+            name: 'Set Theory',
+            overview: 'Introduction to sets, subsets, and operations.',
+            explanation: 'Detailed explanation of sets, union, intersection, difference, and Venn diagrams.'
+          },
+          {
+            id: 'dm2',
+            name: 'Logic and Proofs',
+            overview: 'Basic logic gates and proof techniques.',
+            explanation: 'Explanation of propositional logic, truth tables, predicates, and types of proofs including induction.'
+          }
+        ]
+      }
+    ];
+
+    const subjectListEl = document.getElementById('subjectList');
+    const searchInput = document.getElementById('searchInput');
+    const mainContent = document.getElementById('mainContent');
+    const modeToggle = document.getElementById('modeToggle');
+    const scrollTopBtn = document.getElementById('scrollTopBtn');
+
+    let currentSubjectId = null;
+    let currentUnitId = null;
+    let currentView = 'overview'; // 'overview' or 'explanation'
+
+    function escapeHTML(str) {
+      return str.replace(/[&<>"']/g, m => ({
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        '"': '&quot;',
+        "'": '&#39;'
+      }[m]));
+    }
+
+    function renderSubjectList(filter = '') {
+      subjectListEl.innerHTML = '';
+
+      const filtered = subjects.filter(s => s.name.toLowerCase().includes(filter.toLowerCase()));
+
+      if (filtered.length === 0) {
+        const noResult = document.createElement('p');
+        noResult.textContent = 'No subjects found';
+        noResult.style.padding = '0.5rem';
+        noResult.style.color = 'var(--sidebar-text)';
+        subjectListEl.appendChild(noResult);
+        return;
+      }
+
+      filtered.forEach(subject => {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'subject-item';
+        btn.textContent = subject.name;
+        btn.setAttribute('aria-pressed', 'false');
+        if(subject.id === currentSubjectId) {
+          btn.classList.add('active');
+          btn.setAttribute('aria-pressed', 'true');
+        }
+        btn.addEventListener('click', () => {
+          currentSubjectId = subject.id;
+          currentView = 'overview';
+          currentUnitId = null;
+          renderSubjectList(searchInput.value);
+          renderMainContent();
+          btn.blur();
+        });
+        subjectListEl.appendChild(btn);
+      });
+    }
+
+    function renderMainContent() {
+      if (!currentSubjectId) {
+        mainContent.innerHTML = `
+          <h1>Welcome to College Study Platform</h1>
+          <p class="description">Select a subject from the left menu to see its units, overview, and full explanation.</p>
+        `;
+        return;
+      }
+
+      const subject = subjects.find(s => s.id === currentSubjectId);
+      if (!subject) return;
+
+      mainContent.innerHTML = `
+        <h1>${escapeHTML(subject.name)}</h1>
+      `;
+
+      // Show units list if exists and no unit selected
+      if(subject.units && subject.units.length > 0 && !currentUnitId) {
+        const unitsHtml = subject.units.map(unit => {
+          return `<button type="button" class="unit-button" data-unit-id="${unit.id}" aria-pressed="false">${escapeHTML(unit.name)}</button>`;
+        }).join('');
+        mainContent.innerHTML += `<div class="unit-list" role="list" aria-label="Units">${unitsHtml}</div>`;
+      }
+
+      // Show overview / explanation buttons only if a unit is selected
+      if(currentUnitId) {
+        mainContent.innerHTML += `
+          <div class="option-buttons" role="tablist" aria-label="Select overview or explanation">
+            <button id="btnOverview" role="tab" type="button" aria-selected="${currentView === 'overview'}" tabindex="${currentView === 'overview' ? '0' : '-1'}" class="${currentView === 'overview' ? 'selected' : ''}">Overview</button>
+            <button id="btnExplanation" role="tab" type="button" aria-selected="${currentView === 'explanation'}" tabindex="${currentView === 'explanation' ? '0' : '-1'}" class="${currentView === 'explanation' ? 'selected' : ''}">Full Explanation</button>
+          </div>
+        `;
+      }
+
+      // Render content area
+      let contentText = '';
+      if(currentUnitId) {
+        const unit = subject.units.find(u => u.id === currentUnitId);
+        if(unit) {
+          contentText = currentView === 'overview' ? unit.overview : unit.explanation;
+        }
+      } else {
+        contentText = 'Please select a unit above to see its content.';
+      }
+
+      mainContent.innerHTML += `
+        <section class="content-area" tabindex="0" aria-live="polite" aria-atomic="true">
+          ${escapeHTML(contentText)}
+        </section>
+      `;
+
+      // Return to Home button at bottom
+      if(currentUnitId) {
+        mainContent.innerHTML += `<button id="returnHomeBtn" type="button" aria-label="Return to Home" style="margin-top:10px; align-self:flex-start;">Return to Home</button>`;
+      }
+
+      // Add event listeners
+      if(!currentUnitId) {
+        const unitButtons = mainContent.querySelectorAll('.unit-button');
+        unitButtons.forEach(btn => {
+          btn.addEventListener('click', () => {
+            currentUnitId = btn.getAttribute('data-unit-id');
+            currentView = 'overview';
+            renderMainContent();
+            btn.blur();
+          });
+        });
+      }
+
+      if(currentUnitId) {
+        const returnBtn = document.getElementById('returnHomeBtn');
+        returnBtn?.addEventListener('click', () => {
+          currentSubjectId = null;
+          currentUnitId = null;
+          currentView = 'overview';
+          renderSubjectList(searchInput.value);
+          renderMainContent();
+          returnBtn.blur();
+        });
+
+        const btnOverview = document.getElementById('btnOverview');
+        const btnExplanation = document.getElementById('btnExplanation');
+
+        btnOverview?.addEventListener('click', () => {
+          if(currentView !== 'overview') {
+            currentView = 'overview';
+            renderMainContent();
+          }
+          btnOverview.blur();
+        });
+
+        btnExplanation?.addEventListener('click', () => {
+          if(currentView !== 'explanation') {
+            currentView = 'explanation';
+            renderMainContent();
+          }
+          btnExplanation.blur();
+        });
+      }
+
+      const contentArea = mainContent.querySelector('.content-area');
+      if(contentArea) contentArea.focus();
+    }
+
+    searchInput.addEventListener('input', (e) => {
+      const val = e.target.value.trim();
+      renderSubjectList(val);
+      if (!subjects.some(s => s.id === currentSubjectId && s.name.toLowerCase().includes(val.toLowerCase()))) {
+        currentSubjectId = null;
+        currentUnitId = null;
+        renderMainContent();
+      }
+    });
+
+    modeToggle.addEventListener('click', () => {
+      const body = document.body;
+      if(body.getAttribute('data-theme') === 'light') {
+        body.setAttribute('data-theme', 'dark');
+        modeToggle.textContent = 'Light Mode';
+        modeToggle.setAttribute('aria-pressed', 'true');
+      } else {
+        body.setAttribute('data-theme', 'light');
+        modeToggle.textContent = 'Dark Mode';
+        modeToggle.setAttribute('aria-pressed', 'false');
+      }
+    });
+
+    window.addEventListener('scroll', () => {
+      if(window.pageYOffset > 200) {
+        scrollTopBtn.style.display = 'flex';
+      } else {
+        scrollTopBtn.style.display = 'none';
+      }
+    });
+
+    scrollTopBtn.addEventListener('click', () => {
+      window.scrollTo({top: 0, behavior: 'smooth'});
+      mainContent.focus();
+    });
+
+    renderSubjectList();
+    renderMainContent();
+  </script>
+</body>
+</html>
